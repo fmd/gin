@@ -456,7 +456,22 @@ func (c *Context) XML(code int, obj interface{}) {
 	}
 }
 
-// Renders the HTTP template specified by its file name.
+// Renders the HTML template.
+// It also updates the HTTP code and sets the Content-Type as "text/html".
+func (c *Context) ExecHTML(code int, tmpl *template.Template, data interface{}) {
+	c.Writer.Header().Set("Content-Type", MIMEHTML)
+	if code >= 0 {
+		c.Writer.WriteHeader(code)
+	}
+	if err := tmpl.Execute(c.Writer, data); err != nil {
+		c.ErrorTyped(err, ErrorTypeInternal, H{
+			"data": data,
+		})
+		c.Abort(500)
+	}
+}
+
+// Renders the HTML template specified by its file name.
 // It also updates the HTTP code and sets the Content-Type as "text/html".
 // See http://golang.org/doc/articles/wiki/
 func (c *Context) HTML(code int, name string, data interface{}) {
